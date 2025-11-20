@@ -5,3 +5,18 @@ compatibility_date = "2023-10-25"
 [vars]
 # 可以在这里覆盖 config.js 中的 API KEY，或者直接在代码里写
 API_KEY = "sk-mio-is-watching-you-super-secret-key"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
