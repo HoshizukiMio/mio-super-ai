@@ -1,24 +1,24 @@
 import config from './config.js';
 
-// Common Head: Tailwind + Noto Sans (Global)
+// 公共头部：引入 Tailwind 和 Noto Sans SC 字体
 const commonHead = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mio's SuperAI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Noto Sans (Global) -->
+    <!-- 引入 Noto Sans SC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Apply Font */
+        /* 应用字体 */
         body { 
-            font-family: 'Noto Sans', sans-serif; 
+            font-family: 'Noto Sans SC', sans-serif; 
             background: #fefce8; 
         }
         .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.6; }
-        /* Glassmorphism */
+        /* 磨砂玻璃效果 */
         .glass { 
             background: rgba(255, 255, 255, 0.75); 
             backdrop-filter: blur(12px); 
@@ -29,26 +29,26 @@ const commonHead = `
 </head>
 `;
 
-// Navigation
+// 导航栏
 const navBar = `
 <nav class="p-6 flex justify-center space-x-10 text-lg font-bold text-pink-500">
-    <a href="/" class="hover:text-pink-700 hover:scale-110 transition transform">🏠 Home</a>
-    <a href="/models" class="hover:text-pink-700 hover:scale-110 transition transform">📚 Model Gallery</a>
+    <a href="/" class="hover:text-pink-700 hover:scale-110 transition transform">🏠 首页</a>
+    <a href="/models" class="hover:text-pink-700 hover:scale-110 transition transform">📚 模型图鉴</a>
 </nav>
 `;
 
-// Animated Background Blobs
+// 动态背景球
 const background = `
 <div class="blob bg-pink-300 w-80 h-80 rounded-full top-0 left-0 mix-blend-multiply animate-bounce" style="animation-duration: 6s;"></div>
 <div class="blob bg-yellow-300 w-80 h-80 rounded-full top-0 right-0 mix-blend-multiply animate-bounce" style="animation-duration: 8s;"></div>
 <div class="blob bg-blue-300 w-80 h-80 rounded-full bottom-0 left-20 mix-blend-multiply animate-bounce" style="animation-duration: 10s;"></div>
 `;
 
-// === Home Page ===
+// === 首页 ===
 export function getHomePage() {
     return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="zh-CN">
     ${commonHead}
     <body class="min-h-screen flex flex-col items-center relative overflow-hidden text-slate-700">
         ${background}
@@ -59,69 +59,69 @@ export function getHomePage() {
                 Mio's SuperAI
             </h1>
             <p class="text-xl mb-10 font-medium text-slate-500">
-                "Probably the most ridiculous Artificial 'Intelligence' you've ever used."
+                “大概是你用过最离谱的人工智障。”
             </p>
 
-            <!-- API Key Card -->
+            <!-- API Key 卡片 -->
             <div class="glass rounded-3xl p-10 w-full shadow-2xl transform hover:-translate-y-1 transition duration-300">
                 <h2 class="text-2xl font-bold mb-6 text-pink-600 flex items-center justify-center gap-2">
-                    ✨ Your API Key ✨
+                    ✨ 你的专属 API 密钥 ✨
                 </h2>
                 <div class="bg-slate-800 text-green-400 font-mono p-5 rounded-xl break-all border-2 border-dashed border-slate-600 relative group cursor-pointer transition hover:bg-slate-900 hover:border-green-500 shadow-inner text-lg" 
-                     onclick="navigator.clipboard.writeText('${config.apiKey}'); const el=this.querySelector('span'); el.innerText='Copied!'; setTimeout(()=>el.innerText='Click to Copy', 2000);">
+                     onclick="navigator.clipboard.writeText('${config.apiKey}'); const el=this.querySelector('span'); el.innerText='已复制！'; setTimeout(()=>el.innerText='点击复制', 2000);">
                     ${config.apiKey}
-                    <span class="absolute top-3 right-3 text-xs text-gray-500 group-hover:text-white font-sans bg-slate-700 px-2 py-1 rounded transition">Click to Copy</span>
+                    <span class="absolute top-3 right-3 text-xs text-gray-500 group-hover:text-white font-sans bg-slate-700 px-2 py-1 rounded transition">点击复制</span>
                 </div>
                 
                 <div class="mt-6 grid grid-cols-1 gap-2 text-sm text-gray-600 bg-white/50 p-4 rounded-lg border border-pink-100">
                     <p class="flex justify-between">
-                        <span class="font-bold">Base URL:</span>
-                        <code class="bg-gray-200 px-2 py-0.5 rounded text-pink-600 select-all">https://[your-domain]/v1</code>
+                        <span class="font-bold">Base URL (接口地址):</span>
+                        <code class="bg-gray-200 px-2 py-0.5 rounded text-pink-600 select-all">https://[你的域名]/v1</code>
                     </p>
-                    <p class="mt-2 text-xs text-center text-gray-400">Supports Chat, Embeddings, DALL-E, Whisper formats</p>
+                    <p class="mt-2 text-xs text-center text-gray-400">支持 Chat, Embeddings, DALL-E, Whisper 等接口格式</p>
                 </div>
             </div>
 
-            <!-- Features -->
+            <!-- 特性介绍 -->
             <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 <div class="glass p-6 rounded-2xl text-left hover:bg-white/80 transition">
                     <div class="text-5xl mb-4">🎲</div>
-                    <h3 class="font-bold text-xl mb-2 text-slate-800">Totally Unpredictable</h3>
-                    <p class="text-slate-600 leading-relaxed">It might answer you, it might throw an error, or it might just tell you a bad joke. Mio's mood decides everything.</p>
+                    <h3 class="font-bold text-xl mb-2 text-slate-800">完全不可预测</h3>
+                    <p class="text-slate-600 leading-relaxed">它可能会认真回答你，可能会突然报错，也可能只是想给你讲个冷笑话。Mio 的心情决定一切。</p>
                 </div>
                 <div class="glass p-6 rounded-2xl text-left hover:bg-white/80 transition">
                     <div class="text-5xl mb-4">🎭</div>
-                    <h3 class="font-bold text-xl mb-2 text-slate-800">Fake Model Registry</h3>
-                    <p class="text-slate-600 leading-relaxed">We provide state-of-the-art JSON configurations. Requests for non-existent models (like GPT-4) will be ruthlessly rejected.</p>
+                    <h3 class="font-bold text-xl mb-2 text-slate-800">虚假模型库</h3>
+                    <p class="text-slate-600 leading-relaxed">我们提供最先进的 JSON 配置文件模型。请求不存在的模型（如 GPT-4）会被 Mio 无情拒绝。</p>
                 </div>
             </div>
         </main>
         
         <footer class="p-6 text-slate-400 text-sm font-medium">
-            Powered by Cloudflare Workers & Mio's Whimsy
+            Powered by Cloudflare Workers & Mio 的脑洞
         </footer>
     </body>
     </html>
     `;
 }
 
-// === Models Page ===
+// === 模型图鉴页 ===
 export function getModelsPage() {
-    // Render Cards
+    // 渲染模型卡片
     const modelsHtml = Object.entries(config.models).map(([id, model]) => {
-        // Map types to readable English
+        // 翻译模型类型
         const typeMap = {
-            "chat": "Chat Bot",
-            "chat_logic": "Logic Unit",
-            "embedding": "Embedding",
-            "image": "Image Gen",
-            "audio_in": "Speech to Text",
-            "audio_out": "Text to Speech",
-            "moderation": "Moderation"
+            "chat": "聊天对话",
+            "chat_logic": "逻辑处理",
+            "embedding": "文本嵌入",
+            "image": "AI 绘图",
+            "audio_in": "语音识别",
+            "audio_out": "语音合成",
+            "moderation": "安全审核"
         };
         const typeName = typeMap[model.type] || model.type;
 
-        // Random fake specs
+        // 随机生成一些伪参数
         const contextWindow = Math.floor(Math.random() * 10000) + 1000;
         
         return `
@@ -164,7 +164,7 @@ export function getModelsPage() {
 
     return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="zh-CN">
     ${commonHead}
     <body class="min-h-screen flex flex-col items-center relative overflow-hidden text-slate-700">
         ${background}
@@ -172,20 +172,20 @@ export function getModelsPage() {
 
         <main class="w-full max-w-6xl p-4 z-10">
             <div class="text-center mb-12">
-                <h1 class="text-5xl font-black text-pink-500 mb-4 drop-shadow-sm">Mio Model Gallery</h1>
-                <p class="text-xl text-slate-500">Choose your source of chaos (Only these IDs are supported).</p>
+                <h1 class="text-5xl font-black text-pink-500 mb-4 drop-shadow-sm">Mio 模型画廊</h1>
+                <p class="text-xl text-slate-500">请选择你要调用的混乱源头（仅支持以下模型 ID）</p>
             </div>
 
-            <!-- Grid Layout -->
+            <!-- Grid 布局 -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
                 ${modelsHtml}
             </div>
             
-            <!-- Warning Tip -->
+            <!-- 提示信息 -->
             <div class="text-center bg-white/30 p-4 rounded-lg mx-auto max-w-2xl border border-pink-200">
                 <p class="text-sm text-slate-600">
-                    💡 Tip: You must strictly use the <code class="bg-pink-100 px-1 rounded text-pink-600 font-bold">ID</code> shown above.
-                    <br>Asking for nonexistent models (like GPT-4) will make Mio angry.
+                    💡 提示：在 API 调用中，必须严格使用上述 <code class="bg-pink-100 px-1 rounded text-pink-600 font-bold">ID</code>。
+                    <br>如果尝试调用 gpt-4 等不存在的模型，Mio 会生气并报错。
                 </p>
             </div>
         </main>
