@@ -2,7 +2,7 @@
 
 [**English**](README.md) | [简体中文](README.zh_CN.md)
 
-[Try now](https://en-super-ai.hoshizukimio.com/)
+[Try now](https://super-ai.hoshizukimio.com/)
 
 > "Probably the worst AI you'll ever use."
 
