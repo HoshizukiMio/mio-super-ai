@@ -2,6 +2,8 @@
 
 [**English**](README.md) | [简体中文](README.zh_CN.md)
 
+[Try now](https://en-super-ai.hoshizukimio.com/)
+
 > "Probably the worst AI you'll ever use."
 
 **Mio's SuperAI** is a Cloudflare Workers-based mock API provider. It mimics the OpenAI API structure but returns completely fake, randomized, and often chaotic responses based on a configuration file. 

@@ -2,6 +2,8 @@
 
 [English](README.md) | [**简体中文**](README.zh_CN.md)
 
+[试一试](https://super-ai.hoshizukimio.com/)
+
 > "大概是你用过的最离谱的 AI API。"
 
 **Mio's SuperAI** 是一个基于 Cloudflare Workers 的伪 OpenAI API 提供商。它虽然拥有和 OpenAI 一样的接口格式，但只会返回基于配置文件设定的虚假内容、随机的报错以及充满二次元梗的回复。
