@@ -1,7 +1,7 @@
 import config from './config.js';
 import { getRandomItem, applyMioLogic, jsonResponse, ensureModelExists, verifyApiKey } from './utils.js';
 
-// 1x1 透明 PNG (Base64兜底)
+// 1x1 透明 PNG (Base64兜底，防止下载失败时客户端崩溃)
 const MOCK_B64_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPk5+ffDwACvwF3YOQ8AAAAAABJRU5ErkJggg==";
 
 // 检查心情 (随机报错)
@@ -12,6 +12,28 @@ function checkMioMood() {
       type: "server_error",
       code: "mio_mood_swing"
     };
+  }
+}
+
+// === 辅助函数：下载图片并转 Base64 ===
+async function imageUrlToBase64(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Fetch failed");
+    const arrayBuffer = await response.arrayBuffer();
+    
+    // Cloudflare Worker 中高效的二进制转 Base64 写法
+    let binary = '';
+    const bytes = new Uint8Array(arrayBuffer);
+    const len = bytes.byteLength;
+    // 分块处理防止栈溢出
+    for (let i = 0; i < len; i += 1024) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 1024, len)));
+    }
+    return btoa(binary);
+  } catch (e) {
+    // 下载失败回退到兜底图
+    return MOCK_B64_IMAGE;
   }
 }
 
@@ -31,17 +53,10 @@ function streamResponse(modelId, content) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
       };
 
-      // 1. 发送 Role 起始包 (防止客户端发呆)
-      sendChunk({ role: "assistant", content: "" });
-
-      // 2. 发送内容包
-      sendChunk({ content: content });
-
-      // 3. 发送结束包
-      sendChunk({}, "stop");
-      
-      // 4. 协议终止
-      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      sendChunk({ role: "assistant", content: "" }); // 起始包
+      sendChunk({ content: content });               // 内容包
+      sendChunk({}, "stop");                         // 结束包
+      controller.enqueue(encoder.encode("data: [DONE]\n\n")); // 终止符
       controller.close();
     }
   });
@@ -62,24 +77,20 @@ function handleError(err) {
   if (err.type === 'authentication_error') status = 401;
   else if (err.type === 'invalid_request_error') status = 404;
   else if (err.code === 'empty_message') status = 400;
-  
   return jsonResponse({ error: err }, status);
 }
 
 // === 1. Chat Completions ===
 export async function handleChat(request) {
   try {
-    verifyApiKey(request); // 鉴权
-
+    verifyApiKey(request); 
     const body = await request.json();
     const modelId = body.model;
     const isStream = body.stream === true;
-
     const modelConfig = ensureModelExists(modelId);
     checkMioMood();
 
     const messages = body.messages || [];
-    // 处理多模态/空消息
     let lastMessage = "";
     if (messages.length > 0) {
       const contentObj = messages[messages.length - 1].content;
@@ -91,15 +102,11 @@ export async function handleChat(request) {
       }
     }
 
-    if (!lastMessage.trim()) {
-      throw { message: "Mio didn't hear anything.", type: "invalid_request_error", code: "empty_message" };
-    }
+    if (!lastMessage.trim()) throw { message: "Mio didn't hear anything.", type: "invalid_request_error", code: "empty_message" };
     
-    // 生成逻辑
     let replyContent = getRandomItem(modelConfig.responses || ["Mio?"]);
     let keywordMatched = false;
 
-    // A. 关键词
     if (modelConfig.keywords) {
       const foundKey = Object.keys(modelConfig.keywords).find(k => lastMessage.includes(k));
       if (foundKey) {
@@ -108,7 +115,6 @@ export async function handleChat(request) {
       }
     }
     
-    // B. 逻辑模式
     if (!keywordMatched && modelConfig.type === 'chat_logic') {
         const logicResult = applyMioLogic(lastMessage);
         if(logicResult.length > 1) replyContent = logicResult;
@@ -132,39 +138,66 @@ export async function handleChat(request) {
 }
 
 // === 2. Models List ===
-export async function handleModels() {
-  // 这里通常不需要鉴权，或者也可以加上 verifyApiKey(request)
-  const modelList = Object.keys(config.models).map(id => ({
-    id: id, object: "model", created: 1677610602, owned_by: "mio-super-ai", permission: []
-  }));
-  return jsonResponse({ object: "list", data: modelList });
+export async function handleModels(request) {
+  try {
+    verifyApiKey(request);
+
+    const modelList = Object.keys(config.models).map(id => ({
+      id: id,
+      object: "model",
+      created: 1677610602,
+      owned_by: "mio-super-ai",
+      permission: []
+    }));
+
+    return jsonResponse({ object: "list", data: modelList });
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
-// === 3. Image Generations ===
+// === 3. Image Generations (支持真实 Base64) ===
 export async function handleImages(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     const body = await request.json();
     ensureModelExists(body.model);
     checkMioMood();
 
     let count = parseInt(body.n) || 1;
     if (count < 1) count = 1; if (count > 10) count = 10;
-    const responseFormat = body.response_format || "url";
+    
+    // 检查客户端请求的格式
+    const responseFormat = body.response_format || "url"; // 'url' 或 'b64_json'
     const prompt = body.prompt || "Mio's imagination";
 
     const data = [];
+    
+    // 并行处理多张图片的逻辑
+    const tasks = [];
     for (let i = 0; i < count; i++) {
-      const item = { revised_prompt: `Mio 绘制了: ${prompt}` };
-      if (responseFormat === "b64_json") {
-        item.b64_json = MOCK_B64_IMAGE; // Base64 兜底
-      } else {
-        item.url = getRandomItem(config.images);
-      }
-      data.push(item);
+        tasks.push((async () => {
+            const selectedUrl = getRandomItem(config.images);
+            const item = { revised_prompt: `Mio 绘制了: ${prompt}` };
+
+            if (responseFormat === "b64_json") {
+                // 实时下载图片并转 Base64
+                item.b64_json = await imageUrlToBase64(selectedUrl);
+            } else {
+                // 仅返回 URL
+                item.url = selectedUrl;
+            }
+            return item;
+        })());
     }
 
-    return jsonResponse({ created: Math.floor(Date.now() / 1000), data: data });
+    const results = await Promise.all(tasks);
+
+    return jsonResponse({ 
+        created: Math.floor(Date.now() / 1000), 
+        data: results 
+    });
+
   } catch (err) {
     return handleError(err);
   }
@@ -173,7 +206,7 @@ export async function handleImages(request) {
 // === 4. Embeddings ===
 export async function handleEmbeddings(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     const body = await request.json();
     ensureModelExists(body.model);
     checkMioMood();
@@ -191,7 +224,7 @@ export async function handleEmbeddings(request) {
 // === 5. Legacy Completions ===
 export async function handleLegacyCompletions(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     const body = await request.json();
     const modelConfig = ensureModelExists(body.model);
     checkMioMood();
@@ -210,10 +243,10 @@ export async function handleLegacyCompletions(request) {
   }
 }
 
-// === 6. Audio Speech (TTS) ===
+// === 6. Audio Speech ===
 export async function handleAudioSpeech(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     const body = await request.json();
     ensureModelExists(body.model);
     checkMioMood();
@@ -228,13 +261,12 @@ export async function handleAudioSpeech(request) {
 // === 7. Audio Transcriptions ===
 export async function handleTranscriptions(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     let modelId;
     try {
         const formData = await request.formData();
         modelId = formData.get('model');
     } catch (e) {}
-
     ensureModelExists(modelId);
     checkMioMood();
     return jsonResponse({ text: getRandomItem(config.transcriptions) });
@@ -246,7 +278,7 @@ export async function handleTranscriptions(request) {
 // === 8. Moderations ===
 export async function handleModerations(request) {
   try {
-    verifyApiKey(request); // 鉴权
+    verifyApiKey(request);
     const body = await request.json();
     ensureModelExists(body.model);
     checkMioMood();

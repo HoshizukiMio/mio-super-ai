@@ -1,9 +1,9 @@
 <div align="center">
 
 # ⚡ Mio's SuperAI ⚡
-### 人工智障体验中心
+### 人工智障体验中心 (Ultimate Edition)
 
-**一个基于 Cloudflare Workers 的、极其不靠谱的、二次元浓度过高的 OpenAI API 模拟器。**
+**一个基于 Cloudflare Workers 的、二次元浓度过高的、完全兼容 OpenAI 接口的 API 模拟器。**
 
 <p>
   <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Deployed%20on-Cloudflare%20Workers-orange?style=flat-square&logo=cloudflare" alt="Cloudflare Workers"></a>
@@ -14,40 +14,41 @@
 
 <p align="center">
   <em>"Probably the worst AI you'll ever use."</em><br>
-  （可能是你用过的最糟糕的 AI，但她很可爱。）
+  （可能是你用过的最糟糕的 AI，但她真的很可爱。）
 </p>
 
 </div>
 
 ## 📖 简介
 
-**Mio's SuperAI** 不是一个真正的 AI，它是一个运行在 Cloudflare Workers 上的 API 模拟器。
+**Mio's SuperAI** 是一个运行在 Cloudflare Workers 上的虚假 API 服务。
 
-它**完美兼容 OpenAI 的 API 格式**（支持流式输出、绘图、语音等），可以无缝接入 NextChat、LobeChat、LangChain 等客户端。
+它**完美伪装**成 OpenAI 的 API（支持流式对话、绘图、语音转录、鉴权等），可以无缝接入 NextChat、LobeChat、LangChain 等现代客户端。
 
 **但它绝不按套路出牌：**
-- 它可能在回答一半时去吃布丁。
-- 它可能会因为你问了愚蠢的问题而拒绝服务。
-- 它可能会用满嘴的二次元梗回答你严肃的技术问题。
-- 它有 20% 的概率（可配置）随机报错，模拟服务器崩溃。
+- **拒绝工作**：它可能在回答一半时去吃布丁，或者因为心情不好直接断开连接。
+- **胡言乱语**：不同的模型有不同的人格（话唠、杠精、中二病、暴躁狂）。
+- **虚假绘图**：它会一本正经地去网络上下载随机图片，然后告诉你这是它画的。
+- **随机报错**：内置 20% 的概率（可配置）随机返回 500 或 404 错误，模拟真实的服务器崩溃体验。
 
-**适用场景：**
-- 测试你的应用在 API 不稳定/报错时的健壮性（Chaos Engineering）。
-- 作为一个只有你自己知道密钥的恶作剧 API。
-- 当你需要一个永远秒回（虽然是废话）的“人工智障”伴侣。
-
-## ✨ 特性
+## ✨ 核心特性
 
 - **🧠 多重人格模型**：
-  - **Mio Flash**: 极速响应的元气话唠，只会卖萌。
-  - **Mio Logic**: 强行废话文学，把你的问号变成句号。
-  - **Mio Otaku**: 沉迷二次元的中二病，动不动就 "The World!"。
+  - **Mio Flash**: 元气话唠，脑子里只有布丁，喜欢卖萌。
+  - **Mio Logic**: 废话文学大师，强制把你的问号变成句号。
+  - **Mio Otaku**: 沉迷二次元，满嘴 JOJO、高达和原神梗。
   - **Mio Chaos**: 暴躁老哥，拒绝回答，甚至会骂人。
-- **🎨 灵魂画师**：支持 DALL-E 3 接口，随机返回抽象派图片或 HTTP 猫猫图。
-- **👂 选择性失聪**：支持 Whisper 接口，但永远听不懂你在说什么。
-- **🌊 伪造流式传输**：支持 `stream: true`，完美模拟打字机效果。
-- **🔐 安全鉴权**：内置 API Key 校验，防止白嫖（虽然也没啥价值）。
-- **🖥️ 精美前端**：内置基于 TailwindCSS 的可视化主页和模型图鉴。
+- **🎨 真实图片支持**：
+  - 支持 `DALL-E 3` 接口规范。
+  - 支持 **Base64 (`b64_json`)** 返回格式，Worker 会实时下载随机图片并转码，防止客户端裂图。
+- **🌊 完美流式传输**：
+  - 支持 Server-Sent Events (SSE)，模拟真实的打字机效果。
+  - 包含标准的 `role` 包和 `[DONE]` 结束符，兼容性极佳。
+- **🔐 全局鉴权**：
+  - 所有接口均需要验证 Bearer Token。
+  - 拒绝白嫖，虽然并没有什么有价值的服务。
+- **🖥️ 精美前端**：
+  - 内置基于 TailwindCSS 的主页和模型图鉴页面。
 
 ## 🚀 快速部署
 
@@ -66,7 +67,7 @@ npm install -g wrangler
 ```bash
 wrangler dev
 ```
-按 `b` 打开浏览器，你应该能看到 Mio 的可爱主页。
+按 `b` 打开浏览器，访问 `http://localhost:8787` 查看 Mio 的主页。
 
 ### 4. 发布上线
 ```bash
@@ -76,19 +77,16 @@ wrangler deploy
 
 ## ⚙️ 配置说明
 
-所有的魔法都在 `src/config.js` 中。你可以随意修改文案、概率和模型设定。
+所有的“魔法”都在 `src/config.js` 中。你可以随意修改文案、概率和模型设定。
 
 ```javascript
 export default {
-  // 设置你的 API Key
+  // 设置你的 API Key (显示在前端主页，也用于后端鉴权)
   apiKey: "sk-mio-is-watching-you-super-secret-key",
   
   // 全局随机报错概率 (0.0 - 1.0)
-  // 0.2 表示 20% 的请求会返回 500 或 404 错误
+  // 0.2 表示 20% 的请求会失败，触发 "Mio 去吃布丁了" 等报错
   errorRate: 0.2,
-
-  // 报错文案库 (支持 HTML)
-  errorMessages: [ ... ],
 
   // 模型定义
   models: {
@@ -98,44 +96,44 @@ export default {
       responses: [ ... ] // 随机回复池
     },
     // ... 更多模型
-  }
+  },
+
+  // 图片池、语音池、报错文案池...
 };
 ```
 
-## 🤖 模型列表 (Model List)
+## 🤖 可用模型 (Model List)
 
-| 模型 ID | 头像 | 性格描述 |
-| :--- | :---: | :--- |
-| **mio-flash-v1** | ⚡ | **元气版**：经常胡言乱语，脑子里只有布丁和猫。 |
-| **mio-logic-master** | 🧠 | **逻辑版**：莫得感情的杀手，擅长用废话文学消灭问题。 |
-| **mio-otaku-xl** | 🎌 | **阿宅版**：二次元浓度 1000%，满嘴 JOJO 和高达梗。 |
-| **mio-chaos-ultra** | 🔥 | **暴躁版**：拒绝回答，脾气极差，没事别惹我。 |
-| **mio-paint-v1** | 🎨 | **绘图**：兼容 DALL-E 接口，生成灵魂画作。 |
-| **mio-ear-v1** | 👂 | **听力**：兼容 Whisper 接口，经常空耳。 |
+请在客户端的“自定义模型”中填入以下 ID（不支持 `gpt-3.5` 等官方 ID）：
 
-## 🛠️ 客户端接入指南
+| 模型 ID | 类型 | 描述 |
+| :--- | :--- | :--- |
+| **mio-flash-v1** | Chat | ⚡ **极速版**：随机胡言乱语，偶尔会卖萌。 |
+| **mio-logic-master** | Chat | 🧠 **逻辑版**：莫得感情的杀手，消灭所有疑问句。 |
+| **mio-otaku-xl** | Chat | 🎌 **阿宅版**：二次元浓度 1000%，各种名台词。 |
+| **mio-chaos-ultra** | Chat | 🔥 **暴躁版**：拒绝回答，脾气极差，慎用。 |
+| **mio-paint-v1** | Image | 🎨 **绘图版**：兼容 DALL-E 接口，随机返回抽象图片。 |
+| **mio-ear-v1** | Audio | 👂 **听力版**：兼容 Whisper 接口，经常空耳。 |
 
-Mio's SuperAI 兼容标准的 OpenAI SDK 和各类 Web 客户端。
+## 🛠️ API 调用示例
 
-### 配置参数
-- **接口地址 (Base URL)**: `https://[你的Worker域名]/v1`
-- **API Key**: `sk-mio-is-watching-you-super-secret-key` (默认)
+**Base URL**: `https://[你的Worker域名]/v1`
+**API Key**: `sk-mio-is-watching-you-super-secret-key`
 
-### Curl 示例
-
-**聊天 (Chat):**
+### 1. 聊天 (Chat Completion)
 ```bash
 curl https://[你的域名]/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-mio-is-watching-you-super-secret-key" \
   -d '{
     "model": "mio-otaku-xl",
-    "messages": [{"role": "user", "content": "什么是正义？"}],
+    "messages": [{"role": "user", "content": "真相只有一个"}],
     "stream": true
   }'
 ```
 
-**绘图 (Image):**
+### 2. 绘图 (Image Generation)
+支持返回 URL 或 Base64。
 ```bash
 curl https://[你的域名]/v1/images/generations \
   -H "Content-Type: application/json" \
@@ -143,25 +141,35 @@ curl https://[你的域名]/v1/images/generations \
   -d '{
     "model": "mio-paint-v1",
     "prompt": "一只可爱的猫",
-    "n": 1
+    "n": 1,
+    "response_format": "b64_json"
   }'
 ```
 
-## ⚠️ 常见问题
+### 3. 获取模型列表 (Models)
+```bash
+curl https://[你的域名]/v1/models \
+  -H "Authorization: Bearer sk-mio-is-watching-you-super-secret-key"
+```
 
-**Q: 为什么请求报错 500？**
-A: 恭喜你，触发了 Mio 的心情系统（默认 20% 概率）。多试几次就好了，或者在 `config.js` 中把 `errorRate` 改为 0。
+## ⚠️ 常见问题 FAQ
 
-**Q: 为什么请求报错 404 Model Not Found？**
-A: Mio 非常挑剔。如果你请求 `gpt-3.5-turbo`，她会生气。请务必使用 `mio-xxx` 系列模型 ID。
+**Q: 为什么一直报错 500 / Mio 心情不好？**
+A: 这是特性（Feature）。Mio 设定有 20% 的概率随机报错。如果你受不了，请在 `config.js` 中将 `errorRate` 改为 `0`。
 
-**Q: 为什么绘图返回的是 Base64 像素点？**
-A: 为了防止客户端因为图片加载失败而崩溃，如果客户端请求 `b64_json` 格式，Mio 会返回一个 1x1 的透明像素点。
+**Q: 为什么提示 `404 Model Not Found`？**
+A: Mio 非常挑剔，不支持 `gpt-3.5` 或 `gpt-4` 这种无聊的名字。请务必使用 `mio-flash-v1` 等专属模型 ID。
+
+**Q: 为什么提示 `401 Unauthorized`？**
+A: 你没有提供正确的 API Key。请在请求头中添加 `Authorization: Bearer [你的Key]`。
+
+**Q: 为什么图片生成比较慢？**
+A: 如果你请求了 `b64_json` 格式，Worker 需要先去网上下载图片再转码，这需要一点时间。
 
 ## 📄 免责声明
 
 本项目仅供娱乐、测试和学习 Cloudflare Workers 使用。
-- 请勿在生产环境依赖此 API（除非你想被用户打）。
+- 请勿在生产环境依赖此 API（除非你想被用户投诉）。
 - 文案中包含大量 ACG 梗和搞怪内容，如有雷同，纯属巧合。
 
 ## 📄 License

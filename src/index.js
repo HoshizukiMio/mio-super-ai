@@ -24,7 +24,7 @@ export default {
       "/:GET": () => htmlResponse(getHomePage()),
       "/index.html:GET": () => htmlResponse(getHomePage()),
       "/models:GET": () => htmlResponse(getModelsPage()),
-      "/v1/models:GET": () => handleModels(),
+      "/v1/models:GET": () => handleModels(request), 
       "/v1/chat/completions:POST": () => handleChat(request),
       "/v1/completions:POST": () => handleLegacyCompletions(request),
       "/v1/embeddings:POST": () => handleEmbeddings(request),
