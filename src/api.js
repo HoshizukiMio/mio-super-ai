@@ -102,22 +102,33 @@ export async function handleChat(request) {
       }
     }
 
-    if (!lastMessage.trim()) throw { message: "Mio didn't hear anything.", type: "invalid_request_error", code: "empty_message" };
-    
-    let replyContent = getRandomItem(modelConfig.responses || ["Mio?"]);
-    let keywordMatched = false;
-
-    if (modelConfig.keywords) {
-      const foundKey = Object.keys(modelConfig.keywords).find(k => lastMessage.includes(k));
-      if (foundKey) {
-        replyContent = modelConfig.keywords[foundKey];
-        keywordMatched = true;
-      }
+    if (!lastMessage.trim()) {
+      throw { message: "Mio didn't hear anything.", type: "invalid_request_error", code: "empty_message" };
     }
-    
-    if (!keywordMatched && modelConfig.type === 'chat_logic') {
-        const logicResult = applyMioLogic(lastMessage);
-        if(logicResult.length > 1) replyContent = logicResult;
+
+    let replyContent = "";
+
+    if (modelConfig.type === 'image') {
+      const imageUrl = getRandomItem(config.images);
+      const prompt = lastMessage.length > 10 ? lastMessage.slice(0, 10) + "..." : lastMessage;
+      replyContent = `Mio 根据你的描述 "${prompt}" 画了一张图：\n\n![Mio Art](${imageUrl})\n\n*(注：Mio 觉得这张图简直是艺术)*`;
+    } 
+    else {
+      replyContent = getRandomItem(modelConfig.responses || ["Mio?"]);
+      let keywordMatched = false;
+
+      if (modelConfig.keywords) {
+        const foundKey = Object.keys(modelConfig.keywords).find(k => lastMessage.includes(k));
+        if (foundKey) {
+          replyContent = modelConfig.keywords[foundKey];
+          keywordMatched = true;
+        }
+      }
+      
+      if (!keywordMatched && modelConfig.type === 'chat_logic') {
+          const logicResult = applyMioLogic(lastMessage);
+          if(logicResult.length > 1) replyContent = logicResult;
+      }
     }
 
     if (isStream) {
