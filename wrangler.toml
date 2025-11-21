@@ -3,7 +3,7 @@ main = "src/index.js"
 compatibility_date = "2023-10-25"
 
 [vars]
-# 可以在这里覆盖 config.js 中的 API KEY，或者直接在代码里写
+# 可以在这里覆盖，也可以直接在 config.js 修改
 API_KEY = "sk-mio-is-watching-you-super-secret-key"
 
 [observability]
